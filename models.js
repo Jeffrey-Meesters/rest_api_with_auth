@@ -18,10 +18,10 @@ const CourseSchema = new Schema({
   materialsNeeded: String
 })
 
-const Users = mongoose.model("User", UserSchema);
-const Courses = mongoose.model("Course", CourseSchema);
+const User = mongoose.model("User", UserSchema);
+const Course = mongoose.model("Course", CourseSchema);
 
-export default {
-    Users,
-    Courses
+module.exports = {
+    User,
+    Course
 }
