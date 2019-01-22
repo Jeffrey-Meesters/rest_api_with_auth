@@ -35,8 +35,14 @@ const routes = require("./routes");
 app.use(morgan('dev'));
 
 // TODO setup your api routes here
+// setup a friendly greeting for the root route
+app.get('/', (req, res) => {
+  res.json({
+      message: 'Welcome to the REST API project!',
+  });
+});
 
-app.use(routes);
+app.use('/api', routes);
 
 // send 404 if no other route matched
 app.use((req, res) => {
