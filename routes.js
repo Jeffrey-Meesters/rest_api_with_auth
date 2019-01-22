@@ -8,7 +8,12 @@ const Course = require("./models").Course;
 // GET /users
 // Route for getting current user
 router.get('/users', (req, res, next) => {
-    res.status(200).json({message: 'current user'});
+    User.find({})
+            .sort({createdAt: -1})
+            .exec((err, users) => {
+                if(err) return next(err);
+                res.json(users);
+            });
 });
 
 // POST /users
@@ -20,13 +25,21 @@ router.post('/users', (req, res, next) => {
 // GET /courses
 // Route for getting a list of courses
 router.get('/courses', (req, res, next) => {
-    res.status(200).json({message: 'list of courses + user owning each course'});
+    Course.find({})
+            .sort({createdAt: -1})
+            .exec((err, users) => {
+                if(err) return next(err);
+                res.json(users);
+            });
 });
 
 // GET /courses/:id
 // Route for getting a specific course
 router.get('/courses/:id', (req, res, next) => {
-    res.status(200).json({message: 'Spcific course + owning user'});
+    Course.findById(req.params.id, (err, doc) => {
+        if(err) return next(err);
+        res.json(doc);
+    })
 });
 
 // POST /courses

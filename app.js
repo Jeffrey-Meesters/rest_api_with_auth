@@ -19,9 +19,6 @@ db.on("error", (error) => {
 db.once("open", () => {
     console.log("DB connection seccussful!")
     // DB code goes here
-
-    // db close connection
-    db.close();
 });
 
 // variable to enable global error logging
