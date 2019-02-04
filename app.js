@@ -4,6 +4,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const mongoose = require("mongoose");
+var jsonParser = require("body-parser").json;
 
 // connect mongoose to our DB which is running localy
 mongoose.connect("mongodb://localhost:27017/fsjstd-restapi", { useNewUrlParser: true });
@@ -26,6 +27,7 @@ const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'tr
 
 // create the Express app
 const app = express();
+app.use(jsonParser());
 const routes = require("./routes");
 
 // setup morgan which gives us http request logging
