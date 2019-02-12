@@ -10,41 +10,34 @@ const User = require("./models").User;
 const Course = require("./models").Course;
 
 const authenticateUser = (req, res, next) => {
-    let message = null;
     const credentials = auth(req);
 
     if (credentials) {
-        // .emailAddress === credentials.name
-        const user = User.find({}, (err, u) => {
-            u.forEach((user) => {
-                if (user.emailAddress === credentials.name) {
-                    return u
-                }
-            })
-        });
-        console.log(user)
-        if (user) {
-            const authenticated = bcrypt.compareSync(credentials.pass, user.password);
-
-            if (authenticated) {
-                console.log(`Authentication successful for username: ${user.emailAddress}`);
-                req.currentUser = user;
-            } else {
-                message = 'User authentication faild'
+        // console.log(credentials.name);
+        User.findOne({'emailAddress': credentials.name}, (error, user) => {
+            if (error) {
+                console.warn('error in DB search');
+                res.status(401).json({message: 'Access Denied'})
             }
-        } else {
-            message = 'User is not found'
-        }
+
+            if (user) {
+                // We found a user with this email address.
+                const authenticated = bcrypt.compareSync(credentials.pass, user.password);
+
+                if (!authenticated) {
+                    res.status(401).json({message: 'Access Denied'})
+                } else {
+                    req.currentUser = user;
+                    next();
+                }
+            } else {
+                console.warn('users not found');
+                res.status(401).json({message: 'Access Denied'})
+            }
+        })
     } else {
-        message = 'Auth header not found'
-    }
-
-    if (message) {
-        console.warn(message);
-
+        console.warn('Auth header not found');
         res.status(401).json({message: 'Access Denied'})
-    } else {
-        next();
     }
 }
 
@@ -64,9 +57,6 @@ router.param("id", (req, res, next, id) => {
 // GET /users
 // Route for getting current user
 router.get('/users', authenticateUser, (req, res, next) => {
-    const { currentUser } = req;
-
-    if (currentUser) {
     User.find({})
             .sort({createdAt: -1})
             .exec((err, users) => {
@@ -74,7 +64,6 @@ router.get('/users', authenticateUser, (req, res, next) => {
                 res.status(200);
                 res.json(users);
             });
-    }
 });
 
 // POST /users
