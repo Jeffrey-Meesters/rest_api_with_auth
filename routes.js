@@ -102,6 +102,11 @@ router.post('/users', [
     if (!errors.isEmpty()) {
         const errorMessages = errors.array().map(error => error.msg);
         res.status(400).json(errorMessages);
+    
+    } else if (!req.body.firstName || !req.body.lastName || !req.body.emailAddress || !req.body.password) {
+        const error = new Error('Please provide: firstname, lastname, email address and password');
+        error.status = 400;
+        next(error);
     } else {
         // The user data is on the body of the request object
         const data = req.body;
@@ -150,6 +155,7 @@ router.get('/courses/:id', (req, res, next) => {
         res.status(200).json(req.course);
     } else {
         const error = new Error('Course not found');
+        error.status = 404;
         next(error);
     }
 });
@@ -171,6 +177,10 @@ authenticateUser,
         const errorMessages = errors.array().map(error => error.msg);
         res.status(400);
         res.json(errorMessages);
+    } else if (!req.body.user || !req.body.title || !req.body.description ) {
+        const error = new Error('Please provide: user, title and description');
+        error.status = 400;
+        next(error);        
     } else {
         const course = new Course(req.body);
         if (course) {
@@ -199,6 +209,12 @@ router.put('/courses/:id', [
 ], 
 authenticateUser, 
 (req, res, next) => {
+
+    if (!req.course.user || !req.course.title || !req.course.description) {
+        const error = new Error('Please provide: user, title and description');
+        error.status = 400;
+        return next(error); 
+    }
     
     // Object destructuring to get the currentUser from the req object
     // Got a linter warning on this at work and find it awesome :p    
@@ -223,7 +239,7 @@ authenticateUser,
             if (user) {
                 // emailAddresses should be unique
                 // So when the currentUser emailaddress does not match with the courses owner
-                // email adddress te currentUser may not delete it
+                // email adddress te currentUser may not update it
                 if (currentUser.emailAddress !== user.emailAddress) {
                         
                     res.sendStatus(403) 
@@ -253,10 +269,10 @@ router.delete('/courses/:id', authenticateUser, (req, res, next) => {
     const { currentUser } = req;
     const ownerIds = req.course.user;
 
-    // A user may only update a course if he/she is the owner
+    // A user may only delete a course if he/she is the owner
     // So loop over owner ids
     // check if the currentUser is the owner
-    // If so update else forbid the user
+    // If so delete else forbid the user
     ownerIds.forEach(id => {
         // find a user by id
         User.findById(id, (error, user) => {
